@@ -1,4 +1,4 @@
-# 💊 Afirmative Pill
+# Afirmative Pill
 
 E-commerce farmacéutico académico construido con **GraphQL (Zero-REST)**,
 arquitectura **CQRS**, **DataLoader** y **Subscriptions** en tiempo real,
@@ -46,7 +46,7 @@ Repositories
 Supabase PostgreSQL
 ```
 
-## Diagrama de arquitectura (Mermaid)
+## Diagrama de arquitectura
 
 ```mermaid
 flowchart TD
@@ -143,14 +143,6 @@ Aplicación disponible en `http://localhost:5173`.
 - `VITE_GRAPHQL_HTTP_URL` — URL del endpoint GraphQL HTTP.
 - `VITE_GRAPHQL_WS_URL` — URL del endpoint GraphQL WebSocket.
 
-## Supabase — cómo crear las tablas y cargar el dataset
-
-1. Entrar al proyecto de Supabase → **SQL Editor**.
-2. Ejecutar el contenido de `database/schema.sql` (crea tablas e índices).
-3. Ejecutar el contenido de `database/rpc_functions.sql` (funciones
-   transaccionales de stock y de creación de orden).
-4. Ejecutar el contenido de `database/seed.sql` (carga los 50
-   medicamentos reales del dataset original).
 
 ## Pruebas
 
