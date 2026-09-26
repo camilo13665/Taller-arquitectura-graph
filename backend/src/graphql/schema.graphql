@@ -1,0 +1,196 @@
+scalar DateTime
+
+# =====================================================================
+# ENUMS
+# =====================================================================
+
+enum OrderStatus {
+  PENDING_APPROVAL
+  APPROVED
+  DISPATCHED
+  CANCELLED
+}
+
+enum ErrorCode {
+  INSUFFICIENT_STOCK
+  PRESCRIPTION_REQUIRED
+  INVALID_QUANTITY
+  MEDICATION_NOT_FOUND
+  CART_NOT_FOUND
+  ORDER_NOT_FOUND
+  INVALID_ORDER_STATE
+}
+
+# =====================================================================
+# OBJECT TYPES (Read Model)
+# =====================================================================
+
+type Medication {
+  id: ID!
+  sku: String!
+  name: String!
+  activeIngredient: String!
+  category: String!
+  dosage: String!
+  presentation: String!
+  price: Float!
+  stock: Int!
+  requiresPrescription: Boolean!
+  manufacturer: String!
+  description: String
+}
+
+type MedicationConnection {
+  items: [Medication!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+}
+
+type CartItem {
+  id: ID!
+  medication: Medication!
+  quantity: Int!
+  subtotal: Float!
+}
+
+type Cart {
+  id: ID!
+  status: String!
+  items: [CartItem!]!
+  total: Float!
+}
+
+type Prescription {
+  id: ID!
+  documentRef: String!
+  issuedBy: String!
+  isValid: Boolean!
+}
+
+type OrderItem {
+  id: ID!
+  medication: Medication!
+  quantity: Int!
+  unitPrice: Float!
+  subtotal: Float!
+}
+
+type Order {
+  id: ID!
+  status: OrderStatus!
+  items: [OrderItem!]!
+  total: Float!
+  createdAt: DateTime!
+}
+
+# =====================================================================
+# PAYLOADS (respuestas ricas para mutations)
+# =====================================================================
+
+type OperationError {
+  code: ErrorCode!
+  message: String!
+}
+
+type CreateCartPayload {
+  success: Boolean!
+  cart: Cart
+  error: OperationError
+}
+
+type AddItemToCartPayload {
+  success: Boolean!
+  cart: Cart
+  error: OperationError
+}
+
+type ValidatePrescriptionPayload {
+  success: Boolean!
+  prescription: Prescription
+  error: OperationError
+}
+
+type SubmitOrderPayload {
+  success: Boolean!
+  order: Order
+  error: OperationError
+}
+
+type ApproveOrderPayload {
+  success: Boolean!
+  order: Order
+  error: OperationError
+}
+
+type CancelOrderPayload {
+  success: Boolean!
+  order: Order
+  error: OperationError
+}
+
+# =====================================================================
+# INPUT TYPES
+# =====================================================================
+
+input MedicationFilterInput {
+  name: String
+  activeIngredient: String
+  category: String
+  requiresPrescription: Boolean
+}
+
+input AddItemToCartInput {
+  cartId: ID!
+  medicationId: ID!
+  quantity: Int!
+}
+
+input ValidatePrescriptionInput {
+  cartId: ID!
+  documentRef: String!
+  issuedBy: String!
+}
+
+input SubmitOrderInput {
+  cartId: ID!
+}
+
+# =====================================================================
+# QUERIES  (Read Model — nunca modifican datos)
+# =====================================================================
+
+type Query {
+  """Catálogo con filtros combinables y paginación."""
+  medications(filter: MedicationFilterInput, page: Int = 1, limit: Int = 10): MedicationConnection!
+
+  """Detalle completo de un medicamento."""
+  medication(id: ID!): Medication
+
+  """Consulta proyectada de una orden (read model)."""
+  order(id: ID!): Order
+
+  """Consulta de un carrito."""
+  cart(id: ID!): Cart
+}
+
+# =====================================================================
+# MUTATIONS (Write Model — intenciones de negocio, no CRUD genérico)
+# =====================================================================
+
+type Mutation {
+  createCart: CreateCartPayload!
+  addItemToCart(input: AddItemToCartInput!): AddItemToCartPayload!
+  validatePrescription(input: ValidatePrescriptionInput!): ValidatePrescriptionPayload!
+  submitOrder(input: SubmitOrderInput!): SubmitOrderPayload!
+  approveOrder(orderId: ID!): ApproveOrderPayload!
+  cancelOrder(orderId: ID!): CancelOrderPayload!
+}
+
+# =====================================================================
+# SUBSCRIPTIONS
+# =====================================================================
+
+type Subscription {
+  orderStatusChanged(orderId: ID!): Order!
+}
